@@ -21,12 +21,28 @@ def find_free_port(start_port: int = 8000) -> int:
 
 def run_server(port: int):
     try:
-        config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", loop="asyncio", lifespan="on")
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        config = uvicorn.Config(
+            app,
+            host="127.0.0.1",
+            port=port,
+            log_level="warning",
+            loop="asyncio",
+            http="h11",
+            lifespan="on"
+        )
         server = uvicorn.Server(config)
         server.install_signal_handlers = lambda: None
-        server.run()
-    except Exception:
-        pass
+        loop.run_until_complete(server.serve())
+    except Exception as e:
+        import traceback
+        log_path = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "server_error.log")
+        with open(log_path, "w", encoding="utf-8") as f:
+            f.write(traceback.format_exc())
 
 def main():
     multiprocessing.freeze_support()
@@ -36,13 +52,15 @@ def main():
     server_thread.start()
 
     target_url = f"http://127.0.0.1:{port}"
-    for _ in range(30):
+    server_ready = False
+    for _ in range(50):
         try:
             with urllib.request.urlopen(target_url, timeout=0.5) as resp:
                 if resp.status == 200:
+                    server_ready = True
                     break
         except Exception:
-            time.sleep(0.3)
+            time.sleep(0.2)
 
     try:
         import webview

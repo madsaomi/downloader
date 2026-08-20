@@ -32,10 +32,14 @@ echo [*] Compiling Native Window UniDownloader.exe (this takes ~1-2 minutes)...
     --add-data "static;static" ^
     --add-data "bin;bin" ^
     --hidden-import "uvicorn.logging" ^
+    --hidden-import "uvicorn.loops.asyncio" ^
     --hidden-import "uvicorn.loops.auto" ^
+    --hidden-import "uvicorn.protocols.http.h11_impl" ^
     --hidden-import "uvicorn.protocols.http.auto" ^
     --hidden-import "uvicorn.protocols.websockets.auto" ^
+    --hidden-import "uvicorn.protocols.websockets.websockets_impl" ^
     --hidden-import "uvicorn.lifespan.on" ^
+    --hidden-import "h11" ^
     --hidden-import "yt_dlp" ^
     --hidden-import "yt_dlp.extractor" ^
     --hidden-import "webview" ^

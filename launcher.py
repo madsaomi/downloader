@@ -26,12 +26,12 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     os.system("title UniDownloader Portable")
     port = find_free_port(8000)
-    print("=" * 56)
-    print("             UniDownloader Portable v2.0")
-    print("=" * 56)
-    print(f"[*] Server running at: http://localhost:{port}")
-    print("[*] Opening browser automatically...")
-    print("[*] Press Ctrl+C to stop the server.\n")
+    print("=" * 56, flush=True)
+    print("             UniDownloader Portable v2.0", flush=True)
+    print("=" * 56, flush=True)
+    print(f"[*] Server running at: http://localhost:{port}", flush=True)
+    print("[*] Opening browser automatically...", flush=True)
+    print("[*] Press Ctrl+C to stop the server.\n", flush=True)
 
     threading.Thread(target=open_browser, args=(port,), daemon=True).start()
 

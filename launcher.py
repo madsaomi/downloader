@@ -4,6 +4,7 @@ import time
 import socket
 import threading
 import webbrowser
+import urllib.request
 import multiprocessing
 
 from backend.app import app
@@ -19,7 +20,13 @@ def find_free_port(start_port: int = 8000) -> int:
     return start_port
 
 def run_server(port: int):
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="error")
+    try:
+        config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", loop="asyncio", lifespan="on")
+        server = uvicorn.Server(config)
+        server.install_signal_handlers = lambda: None
+        server.run()
+    except Exception:
+        pass
 
 def main():
     multiprocessing.freeze_support()
@@ -28,13 +35,14 @@ def main():
     server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
     server_thread.start()
 
-    for _ in range(30):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            if s.connect_ex(("127.0.0.1", port)) == 0:
-                break
-        time.sleep(0.1)
-
     target_url = f"http://127.0.0.1:{port}"
+    for _ in range(30):
+        try:
+            with urllib.request.urlopen(target_url, timeout=0.5) as resp:
+                if resp.status == 200:
+                    break
+        except Exception:
+            time.sleep(0.3)
 
     try:
         import webview
@@ -43,12 +51,12 @@ def main():
             url=target_url,
             width=1180,
             height=820,
-            min_size=(900, 600),
+            min_size=(920, 620),
             background_color="#0b0d14",
             text_select=True
         )
-        webview.start()
-    except Exception as e:
+        webview.start(gui="edgechromium")
+    except Exception:
         webbrowser.open(target_url)
         try:
             while True:

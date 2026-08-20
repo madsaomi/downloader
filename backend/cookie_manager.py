@@ -3,9 +3,9 @@ import json
 import uuid
 import time
 from typing import Optional, Dict, Any, List
+from backend.path_utils import get_cookies_dir
 
-COOKIES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cookies"))
-os.makedirs(COOKIES_DIR, exist_ok=True)
+COOKIES_DIR = get_cookies_dir()
 
 SUPPORTED_BROWSERS = [
     {"id": "chrome", "name": "Google Chrome", "icon": "chrome"},

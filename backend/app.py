@@ -349,8 +349,10 @@ async def websocket_tasks_endpoint(websocket: WebSocket):
     except Exception:
         task_manager.unregister_websocket(websocket)
 
+from backend.path_utils import get_static_dir
+
 # Статические файлы фронтенда
-STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static"))
+STATIC_DIR = get_static_dir()
 os.makedirs(STATIC_DIR, exist_ok=True)
 os.makedirs(os.path.join(STATIC_DIR, "css"), exist_ok=True)
 os.makedirs(os.path.join(STATIC_DIR, "js"), exist_ok=True)

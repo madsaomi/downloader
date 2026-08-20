@@ -1,10 +1,11 @@
 import os
 import shutil
 import subprocess
+from backend.path_utils import get_bin_dir
 
 def get_ffmpeg_dir() -> str:
     """Возвращает директорию, содержащую ffmpeg.exe"""
-    bin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "bin"))
+    bin_dir = get_bin_dir()
     os.makedirs(bin_dir, exist_ok=True)
     bin_ffmpeg_win = os.path.join(bin_dir, "ffmpeg.exe")
     bin_ffmpeg_nix = os.path.join(bin_dir, "ffmpeg")

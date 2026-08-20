@@ -17,6 +17,11 @@ cookies/*
 bin/*
 !bin/.gitkeep
 
+# PyInstaller
+dist/
+build/
+*.spec
+
 # IDE & OS
 .idea/
 .vscode/

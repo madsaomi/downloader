@@ -63,7 +63,18 @@ echo [*] Ustanovka zavisimostey (yt-dlp, fastapi, ffmpeg)...
 .venv\Scripts\python.exe -m pip install --upgrade pip
 .venv\Scripts\pip.exe install -r requirements.txt
 
+:: 4. Проверяем наличие Deno (нужен для решения YouTube JS-challenge и разблокировки HD-форматов)
+set "PATH=%USERPROFILE%\.deno\bin;%PATH%"
+where deno >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [*] Ustanovka Deno (dlya YouTube HD/4K formatov)...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://deno.land/install.ps1 | iex"
+    set "PATH=%USERPROFILE%\.deno\bin;%PATH%"
+)
+
 :START_APP
+:: Убеждаемся что Deno доступен в PATH
+set "PATH=%USERPROFILE%\.deno\bin;%PATH%"
 echo.
 echo [*] Zapusk UniDownloader na http://localhost:8000 ...
 echo [*] Otkryvaem brauzer...

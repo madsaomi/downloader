@@ -56,9 +56,11 @@ def build_ydl_options(
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "ios", "web", "mweb"]
+                "player_client": ["default"]
             }
-        }
+        },
+        # Разрешаем yt-dlp скачивать EJS-скрипт для решения YouTube JS-challenge (нужен Deno)
+        "remote_components": {"ejs": "github"},
     }
 
     if proxy and proxy.strip():
@@ -377,9 +379,10 @@ def download_media_item(
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "ios", "web", "mweb"]
+                "player_client": ["default"]
             }
-        }
+        },
+        "remote_components": {"ejs": "github"},
     }
 
     if proxy and proxy.strip():

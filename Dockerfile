@@ -1,6 +1,10 @@
 FROM python:3.12-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg curl nodejs unzip && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем Deno для решения JS-challenge в yt-dlp (открывает 1080p, 2K, 4K)
+RUN curl -fsSL https://deno.land/install.sh | sh
+ENV PATH="/root/.deno/bin:${PATH}"
 
 WORKDIR /app
 

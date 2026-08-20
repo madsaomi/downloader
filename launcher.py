@@ -18,21 +18,45 @@ def find_free_port(start_port: int = 8000) -> int:
         port += 1
     return start_port
 
-def open_browser(port: int):
-    time.sleep(1.2)
-    webbrowser.open(f"http://localhost:{port}")
+def run_server(port: int):
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="error")
+
+def main():
+    multiprocessing.freeze_support()
+    port = find_free_port(8000)
+
+    server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
+    server_thread.start()
+
+    for _ in range(30):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                break
+        time.sleep(0.1)
+
+    target_url = f"http://127.0.0.1:{port}"
+
+    try:
+        import webview
+        window = webview.create_window(
+            title="UniDownloader",
+            url=target_url,
+            width=1180,
+            height=820,
+            min_size=(900, 600),
+            background_color="#0b0d14",
+            text_select=True
+        )
+        webview.start()
+    except Exception as e:
+        webbrowser.open(target_url)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
+
+    os._exit(0)
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
-    os.system("title UniDownloader Portable")
-    port = find_free_port(8000)
-    print("=" * 56, flush=True)
-    print("             UniDownloader Portable v2.0", flush=True)
-    print("=" * 56, flush=True)
-    print(f"[*] Server running at: http://localhost:{port}", flush=True)
-    print("[*] Opening browser automatically...", flush=True)
-    print("[*] Press Ctrl+C to stop the server.\n", flush=True)
-
-    threading.Thread(target=open_browser, args=(port,), daemon=True).start()
-
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
+    main()

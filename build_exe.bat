@@ -24,6 +24,9 @@ if exist "%USERPROFILE%\.deno\bin\deno.exe" (
     )
 )
 
+:: Закрываем предыдущие процессы UniDownloader если запущены
+taskkill /f /im UniDownloader.exe >nul 2>&1
+
 echo [*] Compiling Native Window UniDownloader.exe (this takes ~1-2 minutes)...
 .venv\Scripts\pyinstaller.exe --noconfirm --clean ^
     --onefile ^

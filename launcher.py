@@ -1,5 +1,12 @@
 import os
 import sys
+
+# Защита для PyInstaller --windowed (sys.stdout и sys.stderr равны None в GUI режиме)
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w", encoding="utf-8")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w", encoding="utf-8")
+
 import time
 import socket
 import threading
@@ -30,7 +37,8 @@ def run_server(port: int):
             app,
             host="127.0.0.1",
             port=port,
-            log_level="warning",
+            log_config=None,
+            log_level="critical",
             loop="asyncio",
             http="h11",
             lifespan="on"

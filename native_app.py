@@ -728,7 +728,7 @@ class UniDownloaderNativeApp(ctk.CTk):
         ).start()
 
     def _async_download(self, url, download_type, quality, output_format, video_codec, sub_lang, embed_subs):
-        def progress_cb(task_id, progress_data):
+        def progress_cb(progress_data):
             self.after(0, self._on_progress_update, progress_data)
 
         try:
@@ -737,7 +737,6 @@ class UniDownloaderNativeApp(ctk.CTk):
             backend.downloader.DOWNLOADS_DIR = target_dir
 
             res = download_media_item(
-                task_id="native_task",
                 url=url,
                 download_type=download_type,
                 quality=quality,

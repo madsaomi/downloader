@@ -701,10 +701,14 @@ class UniDownloaderNativeApp(ctk.CTk):
             embed_subs = False
         else:
             download_type = "video"
-            quality_sel = self.quality_var.get()
-            if "(" in quality_sel:
-                quality = quality_sel.split(" ")[0].replace("p", "").replace("⭐", "").strip()
-            else:
+            quality_sel = self.quality_var.get().lower()
+            
+            quality = "best"
+            for res in ["4320p", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"]:
+                if res in quality_sel:
+                    quality = res
+                    break
+            if "максимальн" in quality_sel or "best" in quality_sel:
                 quality = "best"
             output_format = self.format_var.get()
             codec_sel = self.codec_var.get()

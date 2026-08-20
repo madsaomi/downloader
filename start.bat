@@ -13,8 +13,8 @@ cd /d "%~dp0"
 :: 0. Проверяем наличие исходного кода приложения. Если запущен только 1 файл start.bat — скачиваем код с GitHub!
 if not exist "backend\app.py" (
     echo [*] Fayly prilozheniya ne naydeny.
-    echo [*] Zagruzka aktualnoy versii UniDownloader s GitHub (madsaomi13/downloader)...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $zip = Join-Path $env:TEMP 'unidownloader_repo.zip'; $dest = (Get-Location).Path; (New-Object System.Net.WebClient).DownloadFile('https://github.com/madsaomi13/downloader/archive/refs/heads/main.zip', $zip); Expand-Archive -Path $zip -DestinationPath $env:TEMP\unidownloader_tmp -Force; Copy-Item -Path $env:TEMP\unidownloader_tmp\downloader-main\* -Destination $dest -Recurse -Force; Remove-Item $zip -Force; Remove-Item $env:TEMP\unidownloader_tmp -Recurse -Force;"
+    echo [*] Zagruzka aktualnoy versii UniDownloader s GitHub (madsaomi/downloader)...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $zip = Join-Path $env:TEMP 'unidownloader_repo.zip'; $dest = (Get-Location).Path; (New-Object System.Net.WebClient).DownloadFile('https://github.com/madsaomi/downloader/archive/refs/heads/main.zip', $zip); Expand-Archive -Path $zip -DestinationPath $env:TEMP\unidownloader_tmp -Force; Copy-Item -Path $env:TEMP\unidownloader_tmp\downloader-main\* -Destination $dest -Recurse -Force; Remove-Item $zip -Force; Remove-Item $env:TEMP\unidownloader_tmp -Recurse -Force;"
 )
 
 :: 1. Проверяем готовое виртуальное окружение

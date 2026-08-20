@@ -9,6 +9,17 @@ import yt_dlp
 from backend.ffmpeg_helper import get_ffmpeg_path, get_ffmpeg_dir
 from backend.cookie_manager import cookie_manager
 
+# Автоматическое добавление Deno в PATH процесса для решения JS-challenge в yt-dlp
+for deno_candidate in [
+    os.path.expanduser("~/.deno/bin"),
+    os.path.join(os.environ.get("USERPROFILE", ""), ".deno", "bin"),
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), "deno"),
+    "/root/.deno/bin",
+    "/usr/local/bin"
+]:
+    if os.path.isdir(deno_candidate) and deno_candidate not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = deno_candidate + os.pathsep + os.environ.get("PATH", "")
+
 DOWNLOADS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "downloads"))
 os.makedirs(DOWNLOADS_DIR, exist_ok=True)
 

@@ -14,7 +14,7 @@ cd /d "%~dp0"
 if not exist "backend\app.py" (
     echo [*] Fayly prilozheniya ne naydeny.
     echo [*] Zagruzka aktualnoy versii UniDownloader s GitHub (madsaomi/downloader)...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $zip = Join-Path $env:TEMP 'unidownloader_repo.zip'; $dest = (Get-Location).Path; (New-Object System.Net.WebClient).DownloadFile('https://github.com/madsaomi/downloader/archive/refs/heads/main.zip', $zip); Expand-Archive -Path $zip -DestinationPath $env:TEMP\unidownloader_tmp -Force; Copy-Item -Path $env:TEMP\unidownloader_tmp\downloader-main\* -Destination $dest -Recurse -Force; Remove-Item $zip -Force; Remove-Item $env:TEMP\unidownloader_tmp -Recurse -Force;"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $zip = Join-Path $env:TEMP 'unidownloader_repo.zip'; $dest = (Get-Location).Path; try { (New-Object System.Net.WebClient).DownloadFile('https://github.com/madsaomi/downloader/archive/refs/heads/main.zip', $zip); $tmp = Join-Path $env:TEMP 'unidownloader_tmp'; Expand-Archive -Path $zip -DestinationPath $tmp -Force; $root = Get-ChildItem -Path $tmp | Select-Object -First 1; Copy-Item -Path \"$($root.FullName)\*\" -Destination $dest -Recurse -Force; Remove-Item $zip -Force -ErrorAction SilentlyContinue; Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue; } catch { Write-Host '[!] Oshibka skachivaniya repo s GitHub. Ubedites chto repozitoriy Public.'; }"
 )
 
 :: 1. Проверяем готовое виртуальное окружение

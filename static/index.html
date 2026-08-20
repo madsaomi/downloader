@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniDownloader — Скачивание видео, аудио и плейлистов</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Background decorative glowing orbs -->
+  <div class="bg-glow-container">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl border-b border-white/10 bg-slate-900/60 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+          <i data-lucide="download" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-bold font-display tracking-tight gradient-text">UniDownloader</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              FFmpeg & 4K Ready
+            </span>
+            <span id="active-cookie-badge" class="hidden text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full items-center gap-1">
+              <i data-lucide="cookie" class="w-3 h-3"></i>
+              Куки активны
+            </span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Cookies Manager Button -->
+        <button id="btn-open-cookies" class="btn-secondary text-sm py-2 px-3 sm:px-4" title="Управление cookies для приватных и 18+ видео">
+          <i data-lucide="cookie" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden md:inline">Куки & Доступ</span>
+        </button>
+
+        <!-- Batch Download Button -->
+        <button id="btn-open-batch" class="btn-secondary text-sm py-2 px-3 sm:px-4" title="Пакетное скачивание нескольких ссылок">
+          <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+          <span class="hidden md:inline">Пакетно</span>
+        </button>
+
+        <!-- History Button -->
+        <button id="btn-toggle-history" class="btn-secondary text-sm py-2 px-3 sm:px-4" title="История загрузок">
+          <i data-lucide="folder-down" class="w-4 h-4 text-pink-400"></i>
+          <span class="hidden md:inline">История</span>
+          <span id="history-count-badge" class="hidden ml-1 px-1.5 py-0.2 bg-pink-500/20 text-pink-300 text-xs rounded-full">0</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="btn-open-settings" class="btn-secondary text-sm py-2 px-2.5" title="Настройки и система">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button id="btn-theme-toggle" class="btn-secondary text-sm py-2 px-2.5" title="Переключить тему">
+          <i data-lucide="sun" id="icon-sun" class="w-4 h-4 hidden"></i>
+          <i data-lucide="moon" id="icon-moon" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+
+    <!-- Hero Title Section -->
+    <div class="text-center space-y-4 max-w-3xl mx-auto">
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight leading-tight">
+        Скачивайте видео и аудио <br class="hidden sm:block">
+        <span class="gradient-text">в максимальном качестве</span>
+      </h1>
+      <p class="text-base sm:text-lg text-slate-400 font-normal">
+        YouTube (4K, 1080p, 60fps), Shorts, плейлисты, MP3 320kbps, субтитры, TikTok, VK, Reels, Rutube и 1000+ сайтов.
+      </p>
+    </div>
+
+    <!-- Main Search & Input Box -->
+    <div class="space-y-4">
+      <div class="search-container glass-card">
+        <div class="pl-3 pr-2 text-indigo-400">
+          <i data-lucide="link" class="w-6 h-6"></i>
+        </div>
+        <input 
+          type="text" 
+          id="url-input" 
+          placeholder="Вставьте ссылку на видео, Shorts, плейлист или трек..." 
+          class="search-input"
+          autocomplete="off"
+        />
+        <div class="flex items-center gap-2 pr-1">
+          <!-- Clear Button -->
+          <button id="btn-clear-url" class="p-2 text-slate-400 hover:text-white rounded-lg transition-colors hidden" title="Очистить">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+          
+          <!-- Paste Button -->
+          <button id="btn-paste-url" class="btn-secondary text-sm py-2 px-3" title="Вставить из буфера обмена">
+            <i data-lucide="clipboard-paste" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Вставить</span>
+          </button>
+
+          <!-- Submit Extract Button -->
+          <button id="btn-extract" class="btn-primary text-sm sm:text-base py-3 px-5 sm:px-6">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+            <span>Найти</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Option Switches -->
+      <div class="flex flex-wrap items-center justify-between gap-3 px-2 text-xs sm:text-sm text-slate-400">
+        <div class="flex items-center gap-4 flex-wrap">
+          <label class="flex items-center gap-2 cursor-pointer select-none hover:text-white transition-colors">
+            <input type="checkbox" id="chk-is-playlist" class="rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+            <span>Парсить как плейлист / канал</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer select-none hover:text-white transition-colors">
+            <input type="checkbox" id="chk-use-cookies" class="rounded border-slate-700 bg-slate-800 text-amber-600 focus:ring-amber-500 w-4 h-4">
+            <span class="flex items-center gap-1">
+              <i data-lucide="cookie" class="w-3.5 h-3.5 text-amber-400"></i>
+              Использовать Cookies (18+ / закрытые)
+            </span>
+          </label>
+        </div>
+
+        <!-- Supported Platforms Badges -->
+        <div class="flex items-center gap-2 overflow-x-auto py-1">
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">YouTube</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">Shorts</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">TikTok</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">VK</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">Instagram</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">Rutube</span>
+          <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 font-medium">+1000 сайтов</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner & Status -->
+    <div id="loading-section" class="hidden py-12 text-center space-y-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/30 animate-spin">
+        <i data-lucide="loader-2" class="w-8 h-8 text-indigo-400"></i>
+      </div>
+      <p id="loading-text" class="text-lg font-medium text-slate-300">Анализируем ссылку и форматы...</p>
+    </div>
+
+    <!-- Error Box -->
+    <div id="error-section" class="hidden glass-card p-6 border-red-500/30 bg-red-950/20 text-red-200 flex items-start gap-4">
+      <div class="p-2 rounded-xl bg-red-500/20 text-red-400">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-2 flex-1">
+        <h4 class="font-bold text-red-300">Ошибка обработки</h4>
+        <p id="error-message" class="text-sm text-red-200/80"></p>
+        <div id="error-cookie-hint" class="hidden pt-2">
+          <button class="btn-secondary text-xs py-1.5 px-3 border-amber-500/40 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20" onclick="app.openCookiesModal()">
+            <i data-lucide="cookie" class="w-3.5 h-3.5"></i>
+            Настроить Cookies браузера
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Single Video Result Section -->
+    <div id="media-result-section" class="hidden space-y-6">
+      
+      <!-- Video Overview Card -->
+      <div class="glass-card p-6 flex flex-col md:flex-row gap-6 items-start">
+        
+        <!-- Thumbnail with preview overlay -->
+        <div class="relative w-full md:w-80 aspect-video rounded-xl overflow-hidden bg-slate-800 border border-white/10 shrink-0 group">
+          <img id="media-thumb" src="" alt="Thumbnail" class="w-full h-full object-cover">
+          <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 backdrop-blur-md rounded text-xs font-semibold text-white">
+            <span id="media-duration">--:--</span>
+          </div>
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <a id="media-source-link" href="#" target="_blank" class="p-2.5 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-transform hover:scale-110" title="Открыть оригинал">
+              <i data-lucide="external-link" class="w-5 h-5"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Video Info -->
+        <div class="flex-1 space-y-3 w-full">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="media-extractor-badge" class="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              YouTube
+            </span>
+            <span id="media-views" class="text-xs text-slate-400 flex items-center gap-1">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>--</span>
+            </span>
+            <span id="media-date" class="text-xs text-slate-400 flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span>--</span>
+            </span>
+          </div>
+
+          <h2 id="media-title" class="text-xl sm:text-2xl font-bold text-white leading-snug line-clamp-2">
+            Название видео
+          </h2>
+
+          <div class="flex items-center gap-2 text-sm text-slate-300">
+            <i data-lucide="user" class="w-4 h-4 text-purple-400"></i>
+            <span id="media-author" class="font-medium">Автор канала</span>
+          </div>
+
+          <p id="media-description" class="text-xs text-slate-400 line-clamp-2">
+            Описание...
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Format Selection Tabs -->
+      <div class="glass-card p-6 space-y-6">
+        
+        <!-- Tabs Header -->
+        <div class="flex items-center gap-2 border-b border-white/10 pb-4 overflow-x-auto">
+          <button class="tab-btn active" data-tab="tab-video">
+            <i data-lucide="video" class="w-4 h-4"></i>
+            <span>Видео (MP4 / MKV)</span>
+          </button>
+          <button class="tab-btn" data-tab="tab-audio">
+            <i data-lucide="music" class="w-4 h-4"></i>
+            <span>Аудио (MP3 / FLAC)</span>
+          </button>
+          <button class="tab-btn" data-tab="tab-subtitles">
+            <i data-lucide="subtitles" class="w-4 h-4"></i>
+            <span>Субтитры</span>
+            <span id="subtitles-count-badge" class="px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 text-xs rounded-full">0</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: VIDEO -->
+        <div id="tab-video" class="tab-pane space-y-6">
+          
+          <!-- 1-Click Quick Download Pills -->
+          <div class="space-y-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Быстрое скачивание (1 клик):</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button class="btn-primary py-3 px-4 flex-col items-start gap-1 text-left" onclick="app.quickDownloadVideo('best', 'mp4')">
+                <div class="flex items-center justify-between w-full">
+                  <span class="font-bold text-sm">⭐ Максимальное</span>
+                  <i data-lucide="sparkles" class="w-4 h-4 text-yellow-300"></i>
+                </div>
+                <span class="text-[11px] text-white/80">4K / 2K / 1080p (MP4)</span>
+              </button>
+
+              <button class="btn-secondary py-3 px-4 flex-col items-start gap-1 text-left hover:border-indigo-500/50" onclick="app.quickDownloadVideo('1080p', 'mp4')">
+                <div class="flex items-center justify-between w-full">
+                  <span class="font-bold text-sm text-white">Full HD 1080p</span>
+                  <i data-lucide="monitor" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <span class="text-[11px] text-slate-400">Оптимальное для ПК</span>
+              </button>
+
+              <button class="btn-secondary py-3 px-4 flex-col items-start gap-1 text-left hover:border-emerald-500/50" onclick="app.quickDownloadVideo('720p', 'mp4')">
+                <div class="flex items-center justify-between w-full">
+                  <span class="font-bold text-sm text-white">HD 720p</span>
+                  <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <span class="text-[11px] text-slate-400">Для смартфонов (MP4)</span>
+              </button>
+
+              <button class="btn-secondary py-3 px-4 flex-col items-start gap-1 text-left hover:border-purple-500/50" onclick="app.quickDownloadAudio('mp3_320', 'mp3')">
+                <div class="flex items-center justify-between w-full">
+                  <span class="font-bold text-sm text-white">MP3 320 kbps</span>
+                  <i data-lucide="headphones" class="w-4 h-4 text-purple-400"></i>
+                </div>
+                <span class="text-[11px] text-slate-400">Лучшее аудио + Теги</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Video Options Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-white/5 text-sm">
+            <div class="flex items-center gap-3 flex-wrap">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400 text-xs">Контейнер:</span>
+                <select id="select-video-container" class="bg-slate-800 border border-white/10 rounded-lg px-2.5 py-1 text-white outline-none focus:border-indigo-500 text-xs">
+                  <option value="mp4" selected>MP4 (универсальный)</option>
+                  <option value="mkv">MKV (все кодеки)</option>
+                  <option value="webm">WebM (VP9/AV1)</option>
+                  <option value="mov">MOV (Apple)</option>
+                  <option value="avi">AVI</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400 text-xs">Видеокодек:</span>
+                <select id="select-video-codec" class="bg-slate-800 border border-white/10 rounded-lg px-2.5 py-1 text-white outline-none focus:border-indigo-500 text-xs">
+                  <option value="copy" selected>Исходный (без пережатия / быстро)</option>
+                  <option value="h264">H.264 / AVC (для всех ТВ, ПК, телефонов)</option>
+                  <option value="hevc">H.265 / HEVC</option>
+                  <option value="vp9">VP9</option>
+                  <option value="av1">AV1</option>
+                  <option value="h264_recode">H.264 Re-encode (принудительное сжатие)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="chk-embed-subtitles" class="rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-slate-300 text-xs">Вшить субтитры в видео</span>
+              </label>
+              <select id="select-embed-sub-lang" class="bg-slate-800 border border-white/10 rounded-lg px-2.5 py-1 text-white outline-none focus:border-indigo-500 text-xs hidden">
+                <!-- Языки субтитров -->
+              </select>
+            </div>
+          </div>
+
+          <!-- All Available Formats List -->
+          <div class="space-y-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Все доступные разрешения:</span>
+            <div id="video-formats-list" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+              <!-- Динамически заполняется -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: AUDIO -->
+        <div id="tab-audio" class="tab-pane hidden space-y-6">
+          <div class="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-sm flex items-center gap-3">
+            <i data-lucide="info" class="w-5 h-5 text-purple-400 shrink-0"></i>
+            <span>UniDownloader автоматически извлекает аудиопоток в исходном качестве и вшивает обложку трека и метаданные (ID3-теги).</span>
+          </div>
+
+          <div class="space-y-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Выберите формат аудио:</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <span>MP3 320 kbps</span>
+                    <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300">Максимум</span>
+                  </div>
+                  <div class="text-xs text-slate-400">Наивысший битрейт, поддержка всех плееров</div>
+                </div>
+                <button class="btn-primary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('mp3_320', 'mp3', event)">
+                  Скачать MP3
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white">MP3 256 kbps</div>
+                  <div class="text-xs text-slate-400">Высокое качество, умеренный размер</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('mp3_256', 'mp3', event)">
+                  Скачать MP3
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white">MP3 192 kbps</div>
+                  <div class="text-xs text-slate-400">Стандартное качество для наушников</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('mp3_192', 'mp3', event)">
+                  Скачать MP3
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <span>M4A (AAC)</span>
+                    <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300">Для Apple / iPhone</span>
+                  </div>
+                  <div class="text-xs text-slate-400">Нативный формат для iOS и macOS</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('m4a', 'm4a', event)">
+                  Скачать M4A
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <span>FLAC Lossless</span>
+                    <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-pink-500/20 text-pink-300">Студийное</span>
+                  </div>
+                  <div class="text-xs text-slate-400">Без сжатия без потерь (Lossless)</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('flac', 'flac', event)">
+                  Скачать FLAC
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <span>OPUS HD</span>
+                    <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-cyan-500/20 text-cyan-300">Новый кодек</span>
+                  </div>
+                  <div class="text-xs text-slate-400">Превосходная детализация звука</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('opus', 'opus', event)">
+                  Скачать OPUS
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white">WAV Audio</div>
+                  <div class="text-xs text-slate-400">Несжатый формат PCM для монтажа</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('wav', 'wav', event)">
+                  Скачать WAV
+                </button>
+              </div>
+
+              <div class="quality-card">
+                <div>
+                  <div class="font-bold text-white">OGG / Vorbis</div>
+                  <div class="text-xs text-slate-400">Открытый качественный формат</div>
+                </div>
+                <button class="btn-secondary py-2 px-4 text-xs font-bold" onclick="app.downloadAudio('ogg', 'ogg', event)">
+                  Скачать OGG
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: SUBTITLES -->
+        <div id="tab-subtitles" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Доступные дорожки субтитров:</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">Формат:</span>
+              <select id="select-subtitle-format" class="bg-slate-800 border border-white/10 rounded-lg px-2.5 py-1 text-white outline-none focus:border-indigo-500 text-xs">
+                <option value="srt" selected>SRT (стандарт)</option>
+                <option value="vtt">VTT (веб)</option>
+                <option value="ass">ASS (стилизованные)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="subtitles-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
+            <!-- Динамически заполняется -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Playlist Result Section -->
+    <div id="playlist-result-section" class="hidden space-y-6">
+      
+      <!-- Playlist Card Header -->
+      <div class="glass-card p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              Плейлист / Канал
+            </span>
+            <h2 id="playlist-title" class="text-2xl font-bold text-white mt-1">Название плейлиста</h2>
+            <p class="text-sm text-slate-400 mt-0.5">
+              Всего видео: <span id="playlist-total-count" class="text-white font-semibold">0</span> | Автор: <span id="playlist-uploader" class="text-white font-semibold">--</span>
+            </p>
+          </div>
+
+          <!-- Bulk Action Controls -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-playlist-select-all" class="btn-secondary text-xs py-2 px-3">
+              <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+              <span>Выбрать все</span>
+            </button>
+            <button id="btn-playlist-deselect-all" class="btn-secondary text-xs py-2 px-3">
+              <i data-lucide="square" class="w-3.5 h-3.5"></i>
+              <span>Снять выбор</span>
+            </button>
+            <button id="btn-download-selected-playlist" class="btn-secondary text-xs py-2.5 px-3.5 hover:border-indigo-500" title="Скачать каждое видео отдельным файлом">
+              <i data-lucide="download-cloud" class="w-4 h-4 text-indigo-400"></i>
+              <span>Отдельными файлами (<span id="playlist-selected-count">0</span>)</span>
+            </button>
+            <button id="btn-download-playlist-zip" class="btn-primary text-xs py-2.5 px-4 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:brightness-110 shadow-lg shadow-purple-500/30" title="Скачать все выбранные ролики/треки упакованными в один .ZIP архив">
+              <i data-lucide="archive" class="w-4 h-4 text-white"></i>
+              <span class="font-bold">Скачать всё в .ZIP (<span id="playlist-zip-count">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Playlist Download Options -->
+        <div class="flex flex-wrap items-center gap-4 pt-3 border-t border-white/5 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">Тип:</span>
+            <select id="select-playlist-type" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-1 text-white outline-none text-xs">
+              <option value="video">Видео (MP4)</option>
+              <option value="audio">Аудио (MP3 320k)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">Качество:</span>
+            <select id="select-playlist-quality" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-1 text-white outline-none text-xs">
+              <option value="best" selected>Максимальное (1080p/4K)</option>
+              <option value="1080p">1080p Full HD</option>
+              <option value="720p">720p HD</option>
+              <option value="480p">480p SD</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playlist Items List -->
+      <div class="glass-card p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Список видео:</span>
+          <input 
+            type="text" 
+            id="playlist-filter-input" 
+            placeholder="Фильтр по названию..." 
+            class="bg-slate-800 border border-white/10 rounded-lg px-3 py-1 text-xs text-white outline-none focus:border-indigo-500 w-48"
+          />
+        </div>
+
+        <div id="playlist-items-container" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+          <!-- Динамически заполняется -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Tasks Progress Section -->
+    <div id="active-tasks-section" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="font-bold text-lg text-white">Текущие загрузки</h3>
+        </div>
+        <span id="active-tasks-count" class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold">0 активных</span>
+      </div>
+
+      <div id="tasks-container" class="space-y-3">
+        <!-- Активные карточки загрузок -->
+      </div>
+    </div>
+
+    <!-- Recent Downloads / History Section -->
+    <div id="history-section" class="glass-card p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="clock" class="w-5 h-5 text-pink-400"></i>
+          <h3 class="font-bold text-lg text-white">Скачанные файлы</h3>
+        </div>
+        <button id="btn-refresh-history" class="btn-secondary text-xs py-1.5 px-3">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Обновить</span>
+        </button>
+      </div>
+
+      <div id="history-empty-message" class="py-8 text-center text-slate-500 text-sm">
+        Здесь появятся ваши завершенные загрузки
+      </div>
+
+      <div id="history-container" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+        <!-- Список завершенных файлов -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-slate-950/40 py-8 text-center text-xs text-slate-500 space-y-2">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2 font-display font-bold text-slate-300">
+        <div class="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center text-white">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+        </div>
+        <span>UniDownloader</span>
+      </div>
+      <div>
+        Поддержка YouTube, Shorts, TikTok, VK, Rutube, Instagram, Facebook, SoundCloud и 1000+ сервисов.
+      </div>
+      <div class="text-slate-400" id="footer-version-info">
+        v2.0 • yt-dlp & FFmpeg 7.1
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. COOKIES MANAGER MODAL -->
+  <div id="modal-cookies" class="modal-backdrop">
+    <div class="modal-dialog p-6 space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
+            <i data-lucide="cookie" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Управление Cookies</h3>
+            <p class="text-xs text-slate-400">Для скачивания 18+, приватных и спонсорских видео</p>
+          </div>
+        </div>
+        <button class="btn-close-modal p-2 text-slate-400 hover:text-white rounded-lg" onclick="app.closeModals()">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Cookie Options Tabs -->
+      <div class="space-y-4">
+        
+        <!-- Option 1: Browser Cookie Extraction (1 Click) -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-white flex items-center gap-2">
+              <i data-lucide="chrome" class="w-4 h-4 text-indigo-400"></i>
+              Извлечь из установленного браузера:
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">
+            UniDownloader автоматически считает активную сессию из вашего браузера на ПК.
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="browser-cookies-buttons">
+            <!-- Динамически заполняются браузеры -->
+          </div>
+        </div>
+
+        <!-- Option 2: Upload cookies.txt -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-white/10 space-y-3">
+          <span class="text-sm font-semibold text-white flex items-center gap-2">
+            <i data-lucide="file-up" class="w-4 h-4 text-pink-400"></i>
+            Загрузить файл cookies.txt (Netscape):
+          </span>
+          <div id="drop-zone-cookie" class="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:border-indigo-500 cursor-pointer transition-colors">
+            <input type="file" id="input-cookie-file" accept=".txt" class="hidden">
+            <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+            <p class="text-xs text-slate-300 font-medium">Нажмите или перетащите сюда файл cookies.txt</p>
+            <p class="text-[10px] text-slate-500 mt-1">Экспортированный через расширение 'Get cookies.txt LOCALLY'</p>
+          </div>
+        </div>
+
+        <!-- Option 3: Paste Cookie Text -->
+        <div class="p-4 rounded-xl bg-slate-800/60 border border-white/10 space-y-3">
+          <span class="text-sm font-semibold text-white flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+            Вставить текст Cookies:
+          </span>
+          <textarea 
+            id="textarea-cookie-content" 
+            rows="3" 
+            placeholder="# Netscape HTTP Cookie File&#10;.youtube.com TRUE / TRUE 1750000000..." 
+            class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-slate-300 font-mono outline-none focus:border-indigo-500"
+          ></textarea>
+          <div class="flex justify-end">
+            <button id="btn-save-cookie-text" class="btn-primary text-xs py-2 px-4">
+              Сохранить текст cookies
+            </button>
+          </div>
+        </div>
+
+        <!-- Option 4: 1-Click Bookmarklet Button -->
+        <div class="p-4 rounded-xl bg-gradient-to-r from-indigo-950/40 to-purple-950/40 border border-indigo-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="bookmark" class="w-4 h-4 text-amber-400"></i>
+              Кнопка-букмарклет (Скачивание в 1 клик):
+            </span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Перетащите эту кнопку на панель закладок браузера:
+          </p>
+          <div class="pt-1">
+            <a 
+              href="javascript:(function(){const u=window.location.href;window.open(window.location.origin+'/?url='+encodeURIComponent(u),'_blank');})();" 
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs shadow hover:bg-indigo-500 cursor-move"
+              title="Перетащите эту кнопку на панель закладок браузера"
+              onclick="event.preventDefault(); alert('Перетащите эту кнопку на панель закладок браузера (Ctrl+Shift+B)');"
+            >
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>⚡ Скачать в UniDownloader</span>
+            </a>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            При просмотре видео на YouTube/VK/TikTok просто нажмите эту закладку ➔ ролик сразу откроется в UniDownloader!
+          </p>
+        </div>
+
+        <!-- Saved Profiles List -->
+        <div class="space-y-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Сохраненные профили:</span>
+          <div id="cookie-profiles-list" class="space-y-2 max-h-40 overflow-y-auto">
+            <!-- Динамически заполняется -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. BATCH DOWNLOAD MODAL -->
+  <div id="modal-batch" class="modal-backdrop">
+    <div class="modal-dialog p-6 space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400">
+            <i data-lucide="layers" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Пакетное скачивание</h3>
+            <p class="text-xs text-slate-400">Вставьте несколько ссылок (по одной на строку)</p>
+          </div>
+        </div>
+        <button class="btn-close-modal p-2 text-slate-400 hover:text-white rounded-lg" onclick="app.closeModals()">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <textarea 
+          id="batch-urls-input" 
+          rows="6" 
+          placeholder="https://www.youtube.com/watch?v=...&#10;https://www.tiktok.com/@...&#10;https://vk.com/video..." 
+          class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-slate-200 font-mono outline-none focus:border-indigo-500"
+        ></textarea>
+
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="text-slate-400 block mb-1">Формат для всех:</label>
+            <select id="batch-type-select" class="w-full bg-slate-800 border border-white/10 rounded-lg p-2 text-white outline-none">
+              <option value="video_1080p">Видео (1080p MP4)</option>
+              <option value="video_best">Видео (Максимальное качество)</option>
+              <option value="audio_mp3">Аудио (MP3 320 kbps)</option>
+              <option value="audio_m4a">Аудио (M4A AAC)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Использовать куки:</label>
+            <select id="batch-cookie-select" class="w-full bg-slate-800 border border-white/10 rounded-lg p-2 text-white outline-none">
+              <option value="none">Без куки</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn-secondary text-xs py-2 px-4" onclick="app.closeModals()">Отмена</button>
+          <button id="btn-start-batch" class="btn-primary text-xs py-2 px-5">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Запустить пакетную загрузку</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. MEDIA PLAYER MODAL -->
+  <div id="modal-player" class="modal-backdrop">
+    <div class="modal-dialog max-w-4xl p-6 space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 id="player-title" class="text-base font-bold text-white truncate max-w-xl">Воспроизведение</h3>
+        <button class="p-2 text-slate-400 hover:text-white rounded-lg" onclick="app.closePlayerModal()">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="rounded-xl overflow-hidden bg-black flex items-center justify-center min-h-[300px] max-h-[70vh]">
+        <video id="html5-video-player" controls autoplay class="w-full h-full max-h-[65vh] hidden"></video>
+        <div id="html5-audio-wrapper" class="w-full p-8 text-center space-y-4 hidden">
+          <div class="w-20 h-20 rounded-full bg-purple-500/20 border border-purple-500/40 mx-auto flex items-center justify-center text-purple-400 animate-pulse">
+            <i data-lucide="disc" class="w-10 h-10"></i>
+          </div>
+          <audio id="html5-audio-player" controls class="w-full"></audio>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. SETTINGS & SYSTEM INFO MODAL -->
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal-dialog p-6 space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-slate-800 text-indigo-400">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Настройки и система</h3>
+            <p class="text-xs text-slate-400">Параметры соединения, FFmpeg и yt-dlp</p>
+          </div>
+        </div>
+        <button class="btn-close-modal p-2 text-slate-400 hover:text-white rounded-lg" onclick="app.closeModals()">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        
+        <!-- Proxy Setup -->
+        <div class="space-y-2">
+          <label class="font-semibold text-white block">Прокси сервер (опционально):</label>
+          <input 
+            type="text" 
+            id="input-proxy-url" 
+            placeholder="http://user:pass@host:port или socks5://..." 
+            class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-indigo-500 font-mono"
+          />
+          <p class="text-[11px] text-slate-500">Используется для обхода региональных блокировок или Rate Limit</p>
+        </div>
+
+        <!-- System Stats -->
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-white/10 space-y-2.5 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Версия yt-dlp:</span>
+            <span id="sys-ytdlp-ver" class="text-white font-mono font-semibold">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">FFmpeg:</span>
+            <span id="sys-ffmpeg-ver" class="text-emerald-400 font-semibold truncate max-w-xs">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Свободно на диске:</span>
+            <span id="sys-disk-free" class="text-white font-semibold">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Папка загрузок:</span>
+            <span id="sys-download-path" class="text-slate-300 font-mono text-[10px] truncate max-w-xs">./downloads</span>
+          </div>
+        </div>
+
+        <!-- Update Button -->
+        <div class="pt-2 flex justify-between items-center">
+          <button id="btn-update-ytdlp" class="btn-secondary text-xs py-2 px-4">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Обновить yt-dlp до последней версии</span>
+          </button>
+          <button class="btn-primary text-xs py-2 px-5" onclick="app.saveSettings()">
+            Сохранить
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Main JavaScript App -->
+  <script src="/static/js/app.js"></script>
+  <script>
+    // Инициализация Lucide Icons
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

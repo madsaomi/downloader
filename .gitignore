@@ -1,0 +1,26 @@
+# Python Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.class
+
+# User downloads and runtime data
+downloads/*
+!downloads/.gitkeep
+cookies/*
+!cookies/.gitkeep
+bin/*
+!bin/.gitkeep
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

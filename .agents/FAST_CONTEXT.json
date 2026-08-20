@@ -1,0 +1,63 @@
+{
+  "project_name": "UniDownloader",
+  "version": "2.1.0",
+  "description": "Full-featured modern media downloader web service powered by FastAPI, yt-dlp, and FFmpeg.",
+  "tech_stack": {
+    "backend": "Python 3.12, FastAPI, Uvicorn, yt-dlp, imageio-ffmpeg, WebSockets, aiofiles",
+    "frontend": "Vanilla JS (ES6+), HTML5, Tailwind CSS CDN, Lucide Icons CDN, Custom Glassmorphism CSS",
+    "media_engine": "FFmpeg 7.1 (located in bin/ffmpeg.exe or via imageio_ffmpeg)"
+  },
+  "entry_points": {
+    "run_script": "start.bat",
+    "backend_app": "backend/app.py",
+    "web_root": "http://localhost:8000"
+  },
+  "key_components": {
+    "downloader": {
+      "path": "backend/downloader.py",
+      "main_functions": [
+        "extract_media_info(url, cookie_type, cookie_value, proxy, is_playlist)",
+        "download_media_item(url, download_type, quality, output_format, video_codec, sub_lang, embed_subs, cookie_type, cookie_value, proxy, progress_callback)"
+      ]
+    },
+    "task_manager": {
+      "path": "backend/task_manager.py",
+      "main_functions": [
+        "create_task(...)",
+        "start_download_task(task_id, loop)",
+        "broadcast_task_update(task_data)",
+        "get_history()",
+        "delete_history_item(item_id)"
+      ]
+    },
+    "ffmpeg_helper": {
+      "path": "backend/ffmpeg_helper.py",
+      "main_functions": [
+        "get_ffmpeg_dir()",
+        "get_ffmpeg_path()",
+        "get_ffmpeg_version()"
+      ]
+    },
+    "cookie_manager": {
+      "path": "backend/cookie_manager.py",
+      "main_functions": [
+        "list_profiles()",
+        "save_cookie_file(name, file_bytes)",
+        "save_cookie_text(name, content)",
+        "get_cookie_file_path(profile_id)",
+        "get_supported_browsers()"
+      ]
+    },
+    "frontend": {
+      "html": "static/index.html",
+      "css": "static/css/style.css",
+      "js": "static/js/app.js"
+    }
+  },
+  "critical_rules_for_agents": [
+    "NEVER run uvicorn with watch on entire directory - ALWAYS use --reload-dir backend --reload-dir static to prevent WinError 32 file locking.",
+    "ALWAYS pass ffmpeg_location=get_ffmpeg_dir() to yt-dlp so it resolves bin/ffmpeg.exe on Windows.",
+    "ALWAYS keep windowsfilenames=True, overwrites=True, and updatetime=False in ydl_opts.",
+    "Do NOT add heavy node/npm dependencies - the frontend is pure HTML/CSS/JS served directly by FastAPI static files."
+  ]
+}
